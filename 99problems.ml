@@ -83,3 +83,48 @@ let rec flatten = function
 
 assert (flatten [ One "a" ; Many [ One "b" ; Many [ One "c" ; One "d" ] ; One "e" ] ] =
           [ "a" ; "b" ; "c" ; "d" ; "e" ]);;
+
+(* 8. Eliminate consecutive duplicates of list elements. (medium) *)
+let compress ls =
+  let rec inner last = function
+    | [] -> []
+    | head :: rest ->
+      if head = last
+      then inner last rest
+      else head :: inner head rest
+
+  in inner "" ls;;
+
+assert (compress ["a";"a";"a";"a";"b";"c";"c";"a";"a";"d";"e";"e";"e";"e"] =
+          ["a"; "b"; "c"; "a"; "d"; "e"]);;
+
+(* 9. Pack consecutive duplicates of list elements into sublists. (medium) *)
+let pack ls =
+  let rec inner last acc = function
+    | [] -> [last :: acc]   (* flush acc *)
+    | head :: rest ->
+      if head = last
+      then inner last (head :: acc) rest        (* add the element to the acc *)
+      else (last :: acc) :: inner head [] rest  (* flush acc *)
+
+  (* We need to trim off the initial [], added because our initial `last` is "" *)
+  in match (inner "" [] ls) with
+    | _ :: result -> result
+    | [] -> [];;  (* shouldn't be necessary since inner won't return [] *)
+
+assert (pack ["a";"a";"a";"a";"b";"c";"c";"a";"a";"d";"d";"e";"e";"e";"e"] =
+          [["a"; "a"; "a"; "a"]; ["b"]; ["c"; "c"]; ["a"; "a"]; ["d"; "d"];
+           ["e"; "e"; "e"; "e"]]);;
+
+(* 10. Run-length encoding of a list. (easy) *)
+let encode ls =
+  let rec inner = function
+    | [] -> []
+    | (ch :: _ as head) :: tail -> (length head, ch) :: inner tail
+    | _ -> []
+
+  (* should probably just use List.map *)
+  in inner (pack ls);;
+
+assert (encode ["a";"a";"a";"a";"b";"c";"c";"a";"a";"d";"e";"e";"e";"e"] =
+          [(4, "a"); (1, "b"); (2, "c"); (2, "a"); (1, "d"); (4, "e")]);;
