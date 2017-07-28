@@ -78,9 +78,8 @@ type 'a node =
 
 let rec flatten = function
   | [] -> []
-  | head :: tail -> match head with
-    | One item -> item :: flatten tail
-    | Many items -> List.append (flatten items) (flatten tail);;
+  | One item :: tail -> item :: flatten tail
+  | Many items :: tail -> List.append (flatten items) (flatten tail);;
 
 assert (flatten [ One "a" ; Many [ One "b" ; Many [ One "c" ; One "d" ] ; One "e" ] ] =
           [ "a" ; "b" ; "c" ; "d" ; "e" ]);;
