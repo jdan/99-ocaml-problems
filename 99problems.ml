@@ -50,3 +50,37 @@ let length ls =
 
 assert (length [ "a" ; "b" ; "c"] = 3);;
 assert (length [] = 0);;
+
+(* 5. Reverse a list. (easy) *)
+let rev ls =
+  (* We'll pour everything into an accumulator *)
+  let rec inner acc = function
+    | [] -> acc
+    | head :: tail -> inner (head :: acc) tail
+
+  in inner [] ls;;
+
+assert (rev [ "a" ; "b" ; "c" ] = [ "c" ; "b" ; "a" ]);;
+
+(* 6. Find out whether a list is a palindrome. (easy) *)
+let is_palindrome ls = (ls = rev ls);;
+
+assert (is_palindrome [ "x" ; "a" ; "m" ; "a" ; "x" ]);;
+assert (not (is_palindrome [ "a" ; "b" ]));;
+
+(* 7. Flatten a nested list structure. (medium) *)
+(* There is no nested list type in OCaml, so we need to define one
+    first. A node of a nested list is either an element, or a list of
+    nodes. *)
+type 'a node =
+  | One of 'a
+  | Many of 'a node list;;
+
+let rec flatten = function
+  | [] -> []
+  | head :: tail -> match head with
+    | One item -> item :: flatten tail
+    | Many items -> List.append (flatten items) (flatten tail);;
+
+assert (flatten [ One "a" ; Many [ One "b" ; Many [ One "c" ; One "d" ] ; One "e" ] ] =
+          [ "a" ; "b" ; "c" ; "d" ; "e" ]);;
