@@ -27,3 +27,24 @@ assert (last_two [ "a" ; "b" ; "c" ; "d" ] = Some ("c", "d"));;
 assert (last_two [ "a" ; "b" ] = Some ("a", "b"));;
 assert (last_two [ "a" ] = None);;
 assert (last_two [] = None);;
+
+(* 3. Find the k'th element of a list. (easy) *)
+let rec at idx ls = match (ls, idx) with
+  | ([], _) -> None   (* cute that I can do this but maybe hard to read? *)
+  | (head :: _, 1) -> Some head
+  | (_ :: tail, idx) -> at (idx - 1) tail;;
+
+assert (at 3 [ "a" ; "b"; "c"; "d"; "e" ] = Some "c");;
+assert (at 3 [ "a" ] = None);;
+
+(* 4. Find the number of elements of a list. (easy) *)
+(* Bonus for a tail recursive solution. *)
+let rec length ls =
+  let rec inner ls acc = match ls with
+    | [] -> acc
+    | _ :: tail -> inner tail (acc + 1)
+
+  in inner ls 0;;
+
+assert (length [ "a" ; "b" ; "c"] = 3);;
+assert (length [] = 0);;
