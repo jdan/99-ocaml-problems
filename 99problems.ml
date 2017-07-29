@@ -128,3 +128,34 @@ let encode ls =
 
 assert (encode ["a";"a";"a";"a";"b";"c";"c";"a";"a";"d";"e";"e";"e";"e"] =
           [(4, "a"); (1, "b"); (2, "c"); (2, "a"); (1, "d"); (4, "e")]);;
+
+(* 11. Modified run-length encoding. (easy) *)
+type 'a rle =
+  | One of 'a
+  | Many of int * 'a;;
+
+let encode' ls =
+  List.map
+    (fun (count, ch) -> if count = 1
+                        then One ch
+                        else Many (count, ch))
+    (encode ls);;
+
+assert (encode' ["a";"a";"a";"a";"b";"c";"c";"a";"a";"d";"e";"e";"e";"e"] =
+  [Many (4, "a"); One "b"; Many (2, "c"); Many (2, "a"); One "d";
+    Many (4, "e")]);;
+
+(* 12. Decode a run-length encoded list. (medium) *)
+let decode ls =
+  let rec repeat item = function
+    | 0 -> []
+    | n -> item :: repeat item (n - 1)
+
+  and unpack = function
+    | One ch -> [ ch ]
+    | Many (count, ch) -> repeat ch count
+
+  in List.flatten (List.map unpack ls);;
+
+assert (decode [Many (4,"a"); One "b"; Many (2,"c"); Many (2,"a"); One "d"; Many (4,"e")] =
+     ["a"; "a"; "a"; "a"; "b"; "c"; "c"; "a"; "a"; "d"; "e"; "e"; "e"; "e"]);;
