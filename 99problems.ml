@@ -134,14 +134,14 @@ type 'a rle =
   | One of 'a
   | Many of int * 'a;;
 
-let encode' ls =
+let encode2 ls =
   List.map
     (fun (count, ch) -> if count = 1
                         then One ch
                         else Many (count, ch))
     (encode ls);;
 
-assert (encode' ["a";"a";"a";"a";"b";"c";"c";"a";"a";"d";"e";"e";"e";"e"] =
+assert (encode2 ["a";"a";"a";"a";"b";"c";"c";"a";"a";"d";"e";"e";"e";"e"] =
   [Many (4, "a"); One "b"; Many (2, "c"); Many (2, "a"); One "d";
     Many (4, "e")]);;
 
@@ -149,9 +149,9 @@ assert (encode' ["a";"a";"a";"a";"b";"c";"c";"a";"a";"d";"e";"e";"e";"e"] =
 let decode ls =
   let rec repeat item = function
     | 0 -> []
-    | n -> item :: repeat item (n - 1)
+    | n -> item :: repeat item (n - 1) in
 
-  and unpack = function
+  let unpack = function
     | One ch -> [ ch ]
     | Many (count, ch) -> repeat ch count
 
@@ -159,3 +159,24 @@ let decode ls =
 
 assert (decode [Many (4,"a"); One "b"; Many (2,"c"); Many (2,"a"); One "d"; Many (4,"e")] =
      ["a"; "a"; "a"; "a"; "b"; "c"; "c"; "a"; "a"; "d"; "e"; "e"; "e"; "e"]);;
+
+(* 13. Run-length encoding of a list (direct solution). (medium) *)
+let encode3 ls =
+  let rle_from_tuple = function
+    | (1, ch) -> One ch
+    | (n, ch) -> Many (n, ch) in
+
+  let rec inner (n, ch) = function
+    | [] -> [ rle_from_tuple (n, ch) ]   (* flush acc *)
+    | head :: rest ->
+      if head = ch
+      then inner (n + 1, ch) rest               (* add the element to the acc *)
+      else (rle_from_tuple (n, ch)) :: inner (1, head) rest  (* flush acc *)
+
+  (* We need to trim off the initial [], added because our initial `last` is "" *)
+  in match (inner (0, "") ls) with
+    | _ :: result -> result
+    | [] -> [];;  (* shouldn't be necessary since inner won't return [] *)
+
+assert (encode3 ["a";"a";"a";"a";"b";"c";"c";"a";"a";"d";"e";"e";"e";"e"] =
+          [Many (4, "a"); One "b"; Many (2, "c"); Many (2, "a"); One "d";Many (4, "e")]);;
